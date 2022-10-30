@@ -1,0 +1,355 @@
+https://stackoverflow.com/questions/70978634/looking-for-an-html-ide-where-clicking-on-an-element-in-the-live-preview-highlig:
+
+1, Adobe Dreamweaver, just use Split Mode.
+You code yourself, just use the Editor part as a Live Preview so you won't mess-up with redundant and ugly codes.
+You click on the code, and the live preview corresponding element will be highlighted, you click on the live preview, the text cursor will jump to the code.
+2, Brackets
+It just works exactly like what you want, but unfortunately, it is discontinued by Adobe.
+3, Five servers (VSC Extension)
+https://marketplace.visualstudio.com/items?itemName=yandeu.five-server
+It is only one-way-highlight. You can't jump to code by clicking on Live Preview.
+I haven't found any VSC extension working the way you want.
+    https://stackoverflow.com/questions/71019551/spyder-5-windows-variable-explorer-doesnt-show-pandas-dataframes:
+
+Downgrading pandas worked for me. I had version 1.4.2 of pandas and the Spyder installer I used (5.15) had come with pandas version 1.3.3. I think that version of spyder isn't compatible with the newer pandas version so I downgraded the pandas package that's used in the python interpreter (not the one that comes with the installer)  to 1.3.3
+You could also try different versions of the Spyder installer. A couple of the versions was giving me different problems and I found version 5.15 to be the sweet spot for my setup.
+    https://stackoverflow.com/questions/70972106/how-to-configure-proxy-in-emulators-in-new-versions-of-android-studio:
+
+You can open old emulator version by unchecking setting here
+If you struggle to close your old emulator, try killing qemu... process
+    ............................................................
+You can go to setup proxy in Android Studio itself.
+
+Configure Proxy in the Preferences window
+
+
+Go to Preferences window (Mac: cmd+, shortcut).
+Click Appearance & Behavior on the left panel
+Click System Settings on the left panel
+Click HTTTP Proxy on the left panel
+Setup your preferred proxy settings
+Confirm by clicking OK
+
+
+You need to restart emulator to apply your changes
+
+The downside of the solution is that the proxy is also applied to Android Studio itself. So traffic from Android Studio goes through the proxy.
+    ............................................................
+After a while trying to find solutions to this problem, I saw that an emulator running outside android studio provides these options. To run a standalone Android Studio emulator see the official documentation or simply enter the command:
+emulator -avd <avd_name>
+
+In my case I'm using an avd named PIXEL 4 API 30, so the command will be emulator -avd PIXEL_4_API_30. If you are on Windows you may have problems running this command so I suggest you see this.
+Edit
+The solution proposed by @Inliner also solves this problem.
+    https://stackoverflow.com/questions/71015951/import-packages-works-in-idle-exe-but-not-in-ide-python:
+
+Ok, simple answer:
+In Pycharm, go to the bottom  and click on Python Console. Then type pip install pyshp. Voila! Assuming it works for other packages as well. Still do not know where to make pycharm work with the other environment...
+    https://stackoverflow.com/questions/70997732/disable-structure-view-of-phpstorm:
+
+You need to disable "Show Members" option.
+
+Either right click on the "Project" tool window header or click on the Cog icon
+Ensure that "Tree Appearance | Show members" is unchecked.
+
+
+    https://stackoverflow.com/questions/70962167/unable-to-parse-template-class-error-message-android-studio:
+
+As i commented before, the problem was solved by rewriting the Java Class template in the project and global instance of it.
+I don't really know why it didn't work before, but if someone is in that position just try again with this method.
+    https://stackoverflow.com/questions/1716296/why-does-printf-not-flush-after-the-call-unless-a-newline-is-in-the-format-strin:
+
+The stdout stream is line buffered by default, so will only display what's in the buffer after it reaches a newline (or when it's told to). You have a few options to print immediately:
+
+Print to stderrinstead using fprintf (stderr is unbuffered by default):
+fprintf(stderr, "I will be printed immediately");
+
+
+Flush stdout whenever you need it to using fflush:
+printf("Buffered, will be flushed");
+fflush(stdout); // Will now print everything in the stdout buffer
+
+
+Disable buffering on stdout by using setbuf:
+setbuf(stdout, NULL);
+
+
+Or use the more flexible setvbuf:
+setvbuf(stdout, NULL, _IONBF, 0); 
+
+
+
+    ............................................................
+No, it's not POSIX behaviour, it's ISO behaviour (well, it is POSIX behaviour but only insofar as they conform to ISO).
+Standard output is line buffered if it can be detected to refer to an interactive device, otherwise it's fully buffered. So there are situations where printf won't flush, even if it gets a newline to send out, such as:
+myprog >myfile.txt
+
+This makes sense for efficiency since, if you're interacting with a user, they probably want to see every line. If you're sending the output to a file, it's most likely that there's not a user at the other end (though not impossible, they could be tailing the file). Now you could argue that the user wants to see every character but there are two problems with that.
+The first is that it's not very efficient. The second is that the original ANSI C mandate was to primarily codify existing behaviour, rather than invent new behaviour, and those design decisions were made long before ANSI started the process. Even ISO nowadays treads very carefully when changing existing rules in the standards.
+As to how to deal with that, if you fflush (stdout) after every output call that you want to see immediately, that will solve the problem.
+Alternatively, you can use setvbuf before operating on stdout, to set it to unbuffered and you won't have to worry about adding all those fflush lines to your code:
+setvbuf (stdout, NULL, _IONBF, BUFSIZ);
+
+Just keep in mind that may affect performance quite a bit if you are sending the output to a file. Also keep in mind that support for this is implementation-defined, not guaranteed by the standard.
+ISO C99 section 7.19.3/3 is the relevant bit:
+
+When a stream is unbuffered, characters are intended to appear from the source or at the destination as soon as possible. Otherwise characters may be accumulated and transmitted to or from the host environment as a block.
+When a stream is fully buffered, characters are intended to be transmitted to or from the host environment as a block when a buffer is filled.
+When a stream is line buffered, characters are intended to be transmitted to or from the host environment as a block when a new-line character is encountered.
+Furthermore, characters are intended to be transmitted as a block to the host environment when a buffer is filled, when input is requested on an unbuffered stream, or when input is requested on a line buffered stream that requires the transmission of characters from the host environment.
+Support for these characteristics is implementation-defined, and may be affected via the setbuf and setvbuf functions.
+
+    ............................................................
+It's probably like that because of efficiency and because if you have multiple programs writing to a single TTY, this way you don't get characters on a line interlaced. So if program A and B are outputting, you'll usually get:
+
+program A output
+program B output
+program B output
+program A output
+program B output
+
+
+This stinks, but it's better than
+
+proprogrgraam m AB  ououtputputt
+prproogrgram amB A  ououtputtput
+program B output
+
+
+Note that it isn't even guaranteed to flush on a newline, so you should flush explicitly if flushing matters to you.
+    ............................................................
+To immediately flush call fflush(stdout) or fflush(NULL) (NULL means flush everything).
+    ............................................................
+stdout is buffered, so will only output after a newline is printed.
+
+To get immediate output, either:
+
+
+Print to stderr.
+Make stdout unbuffered.
+
+    ............................................................
+Note: Microsoft runtime libraries do not support line buffering, so printf("will print immediately to terminal"):
+
+https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setvbuf
+    ............................................................
+by default, stdout is line buffered, stderr is none buffered and file is completely buffered.
+    ............................................................
+You can fprintf to stderr, which is unbuffered, instead.  Or you can flush stdout when you want to.  Or you can set stdout to unbuffered.
+    ............................................................
+Use setbuf(stdout, NULL); to disable buffering.
+    ............................................................
+There are generally 2 levels of buffering-
+
+1. Kernel buffer Cache (makes read/write faster)
+
+2. Buffering in I/O library (reduces no. of system calls)
+
+Let's take example of fprintf and write().
+
+When you call fprintf(), it doesn't wirte directly to the file. It first goes to stdio buffer in the program's memory. From there it is written to the kernel buffer cache by using write system call. So one way to skip I/O buffer is directly using write(). Other ways are by using setbuff(stream,NULL). This sets the buffering mode to no buffering and data is directly written to kernel buffer.
+To forcefully make the data to be shifted to kernel buffer, we can use "\n", which in case of default buffering mode of 'line buffering', will flush I/O buffer.
+Or we can use fflush(FILE *stream).
+
+Now we are in kernel buffer. Kernel(/OS) wants to minimise disk access time and hence it reads/writes only blocks of disk. So when a read() is issued, which is a system call and can be invoked directly or through fscanf(), kernel reads the disk block from disk and stores it in a buffer. After that data is copied from here to user space.
+
+Similarly that fprintf() data recieved from I/O buffer is written to the disk by the kernel. This makes read() write() faster.
+
+Now to force the kernel to initiate a write(), after which data transfer is controlled by hardware controllers, there are also some ways. We can use O_SYNC or similar flags during write calls. Or we could use other functions like fsync(),fdatasync(),sync() to make the kernel initiate writes as soon as data is available in the kernel buffer.
+    https://stackoverflow.com/questions/68216737/in-pycharm-is-there-a-way-to-unify-the-run-and-debug-windows:
+
+
+Is there any option in PyCharm to merge these two windows
+
+No. In the PyCharm nomenclature Run and Debug are "tool windows", not just windows. You can open each "tool window" in its own window but you can't merge 2 "tool windows".
+Another thing are the "toolbars" of which you have 3, left, right and bottom. You can pin "tool windows" to the toolbars and they show like tabs but they are still separate and not merged, just tabs.
+
+The main problem I find, is the tool windows for Run and Debug are separate.
+
+That's a PyCharm rule an there's no way around it. Each of those "tool windows" works as a separate application/plugin. They aren't meant to be merged. The windows don't have that functionality.
+The easy way to do this is using the keyboard shortcuts, Alt+4 or Alt+5 takes you to Run or Debug, Shift+F10 launches the Run config and switches focus to the Run tool window, same with Shift+F9 for the Debug tool window.
+If you right-click on the toolbar and choose View Mode > Window for both tool windows you can put them on the 2nd screen over each other. That gives you maximum real-estate with 1-keyboard stroke switch and running, but not tabbed clicking.
+That's as good as it gets, you can't have both tool windows tabbed on a single window outside the toolbars.
+
+on a separate hidden desktop so I have to take the time to find the desktop, open the desktop, then switch to the correct tool window.
+
+Having the 1-keystroke solution working would depend if the OS allows you to configure the Desktops to gain focus and come to the forefront if any of the windows in them have activity.
+If not, an alternative would be a coinciding key bind where you set the Desktop containing the Run and Debug "window toolbars" to gain focus when you press Alt+4, Alt+5, Shift+F9, Shift+F10. Or changing the PyCharm shortcuts to coincide with the OS keyboard shortcuts that focus the designated Desktop.
+    https://stackoverflow.com/questions/70972106/how-to-configure-proxy-in-emulators-in-new-versions-of-android-studio:
+
+You can open old emulator version by unchecking setting here
+If you struggle to close your old emulator, try killing qemu... process
+    ............................................................
+You can go to setup proxy in Android Studio itself.
+
+Configure Proxy in the Preferences window
+
+
+Go to Preferences window (Mac: cmd+, shortcut).
+Click Appearance & Behavior on the left panel
+Click System Settings on the left panel
+Click HTTTP Proxy on the left panel
+Setup your preferred proxy settings
+Confirm by clicking OK
+
+
+You need to restart emulator to apply your changes
+
+The downside of the solution is that the proxy is also applied to Android Studio itself. So traffic from Android Studio goes through the proxy.
+    ............................................................
+After a while trying to find solutions to this problem, I saw that an emulator running outside android studio provides these options. To run a standalone Android Studio emulator see the official documentation or simply enter the command:
+emulator -avd <avd_name>
+
+In my case I'm using an avd named PIXEL 4 API 30, so the command will be emulator -avd PIXEL_4_API_30. If you are on Windows you may have problems running this command so I suggest you see this.
+Edit
+The solution proposed by @Inliner also solves this problem.
+    https://stackoverflow.com/questions/70997732/disable-structure-view-of-phpstorm:
+
+You need to disable "Show Members" option.
+
+Either right click on the "Project" tool window header or click on the Cog icon
+Ensure that "Tree Appearance | Show members" is unchecked.
+
+
+    https://stackoverflow.com/questions/70978634/looking-for-an-html-ide-where-clicking-on-an-element-in-the-live-preview-highlig:
+
+1, Adobe Dreamweaver, just use Split Mode.
+You code yourself, just use the Editor part as a Live Preview so you won't mess-up with redundant and ugly codes.
+You click on the code, and the live preview corresponding element will be highlighted, you click on the live preview, the text cursor will jump to the code.
+2, Brackets
+It just works exactly like what you want, but unfortunately, it is discontinued by Adobe.
+3, Five servers (VSC Extension)
+https://marketplace.visualstudio.com/items?itemName=yandeu.five-server
+It is only one-way-highlight. You can't jump to code by clicking on Live Preview.
+I haven't found any VSC extension working the way you want.
+    https://stackoverflow.com/questions/71019551/spyder-5-windows-variable-explorer-doesnt-show-pandas-dataframes:
+
+Downgrading pandas worked for me. I had version 1.4.2 of pandas and the Spyder installer I used (5.15) had come with pandas version 1.3.3. I think that version of spyder isn't compatible with the newer pandas version so I downgraded the pandas package that's used in the python interpreter (not the one that comes with the installer)  to 1.3.3
+You could also try different versions of the Spyder installer. A couple of the versions was giving me different problems and I found version 5.15 to be the sweet spot for my setup.
+    https://stackoverflow.com/questions/70962167/unable-to-parse-template-class-error-message-android-studio:
+
+As i commented before, the problem was solved by rewriting the Java Class template in the project and global instance of it.
+I don't really know why it didn't work before, but if someone is in that position just try again with this method.
+    https://stackoverflow.com/questions/1716296/why-does-printf-not-flush-after-the-call-unless-a-newline-is-in-the-format-strin:
+
+The stdout stream is line buffered by default, so will only display what's in the buffer after it reaches a newline (or when it's told to). You have a few options to print immediately:
+
+Print to stderrinstead using fprintf (stderr is unbuffered by default):
+fprintf(stderr, "I will be printed immediately");
+
+
+Flush stdout whenever you need it to using fflush:
+printf("Buffered, will be flushed");
+fflush(stdout); // Will now print everything in the stdout buffer
+
+
+Disable buffering on stdout by using setbuf:
+setbuf(stdout, NULL);
+
+
+Or use the more flexible setvbuf:
+setvbuf(stdout, NULL, _IONBF, 0); 
+
+
+
+    ............................................................
+No, it's not POSIX behaviour, it's ISO behaviour (well, it is POSIX behaviour but only insofar as they conform to ISO).
+Standard output is line buffered if it can be detected to refer to an interactive device, otherwise it's fully buffered. So there are situations where printf won't flush, even if it gets a newline to send out, such as:
+myprog >myfile.txt
+
+This makes sense for efficiency since, if you're interacting with a user, they probably want to see every line. If you're sending the output to a file, it's most likely that there's not a user at the other end (though not impossible, they could be tailing the file). Now you could argue that the user wants to see every character but there are two problems with that.
+The first is that it's not very efficient. The second is that the original ANSI C mandate was to primarily codify existing behaviour, rather than invent new behaviour, and those design decisions were made long before ANSI started the process. Even ISO nowadays treads very carefully when changing existing rules in the standards.
+As to how to deal with that, if you fflush (stdout) after every output call that you want to see immediately, that will solve the problem.
+Alternatively, you can use setvbuf before operating on stdout, to set it to unbuffered and you won't have to worry about adding all those fflush lines to your code:
+setvbuf (stdout, NULL, _IONBF, BUFSIZ);
+
+Just keep in mind that may affect performance quite a bit if you are sending the output to a file. Also keep in mind that support for this is implementation-defined, not guaranteed by the standard.
+ISO C99 section 7.19.3/3 is the relevant bit:
+
+When a stream is unbuffered, characters are intended to appear from the source or at the destination as soon as possible. Otherwise characters may be accumulated and transmitted to or from the host environment as a block.
+When a stream is fully buffered, characters are intended to be transmitted to or from the host environment as a block when a buffer is filled.
+When a stream is line buffered, characters are intended to be transmitted to or from the host environment as a block when a new-line character is encountered.
+Furthermore, characters are intended to be transmitted as a block to the host environment when a buffer is filled, when input is requested on an unbuffered stream, or when input is requested on a line buffered stream that requires the transmission of characters from the host environment.
+Support for these characteristics is implementation-defined, and may be affected via the setbuf and setvbuf functions.
+
+    ............................................................
+It's probably like that because of efficiency and because if you have multiple programs writing to a single TTY, this way you don't get characters on a line interlaced. So if program A and B are outputting, you'll usually get:
+
+program A output
+program B output
+program B output
+program A output
+program B output
+
+
+This stinks, but it's better than
+
+proprogrgraam m AB  ououtputputt
+prproogrgram amB A  ououtputtput
+program B output
+
+
+Note that it isn't even guaranteed to flush on a newline, so you should flush explicitly if flushing matters to you.
+    ............................................................
+To immediately flush call fflush(stdout) or fflush(NULL) (NULL means flush everything).
+    ............................................................
+stdout is buffered, so will only output after a newline is printed.
+
+To get immediate output, either:
+
+
+Print to stderr.
+Make stdout unbuffered.
+
+    ............................................................
+Note: Microsoft runtime libraries do not support line buffering, so printf("will print immediately to terminal"):
+
+https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setvbuf
+    ............................................................
+by default, stdout is line buffered, stderr is none buffered and file is completely buffered.
+    ............................................................
+You can fprintf to stderr, which is unbuffered, instead.  Or you can flush stdout when you want to.  Or you can set stdout to unbuffered.
+    ............................................................
+Use setbuf(stdout, NULL); to disable buffering.
+    ............................................................
+There are generally 2 levels of buffering-
+
+1. Kernel buffer Cache (makes read/write faster)
+
+2. Buffering in I/O library (reduces no. of system calls)
+
+Let's take example of fprintf and write().
+
+When you call fprintf(), it doesn't wirte directly to the file. It first goes to stdio buffer in the program's memory. From there it is written to the kernel buffer cache by using write system call. So one way to skip I/O buffer is directly using write(). Other ways are by using setbuff(stream,NULL). This sets the buffering mode to no buffering and data is directly written to kernel buffer.
+To forcefully make the data to be shifted to kernel buffer, we can use "\n", which in case of default buffering mode of 'line buffering', will flush I/O buffer.
+Or we can use fflush(FILE *stream).
+
+Now we are in kernel buffer. Kernel(/OS) wants to minimise disk access time and hence it reads/writes only blocks of disk. So when a read() is issued, which is a system call and can be invoked directly or through fscanf(), kernel reads the disk block from disk and stores it in a buffer. After that data is copied from here to user space.
+
+Similarly that fprintf() data recieved from I/O buffer is written to the disk by the kernel. This makes read() write() faster.
+
+Now to force the kernel to initiate a write(), after which data transfer is controlled by hardware controllers, there are also some ways. We can use O_SYNC or similar flags during write calls. Or we could use other functions like fsync(),fdatasync(),sync() to make the kernel initiate writes as soon as data is available in the kernel buffer.
+    https://stackoverflow.com/questions/71015951/import-packages-works-in-idle-exe-but-not-in-ide-python:
+
+Ok, simple answer:
+In Pycharm, go to the bottom  and click on Python Console. Then type pip install pyshp. Voila! Assuming it works for other packages as well. Still do not know where to make pycharm work with the other environment...
+    https://stackoverflow.com/questions/68216737/in-pycharm-is-there-a-way-to-unify-the-run-and-debug-windows:
+
+
+Is there any option in PyCharm to merge these two windows
+
+No. In the PyCharm nomenclature Run and Debug are "tool windows", not just windows. You can open each "tool window" in its own window but you can't merge 2 "tool windows".
+Another thing are the "toolbars" of which you have 3, left, right and bottom. You can pin "tool windows" to the toolbars and they show like tabs but they are still separate and not merged, just tabs.
+
+The main problem I find, is the tool windows for Run and Debug are separate.
+
+That's a PyCharm rule an there's no way around it. Each of those "tool windows" works as a separate application/plugin. They aren't meant to be merged. The windows don't have that functionality.
+The easy way to do this is using the keyboard shortcuts, Alt+4 or Alt+5 takes you to Run or Debug, Shift+F10 launches the Run config and switches focus to the Run tool window, same with Shift+F9 for the Debug tool window.
+If you right-click on the toolbar and choose View Mode > Window for both tool windows you can put them on the 2nd screen over each other. That gives you maximum real-estate with 1-keyboard stroke switch and running, but not tabbed clicking.
+That's as good as it gets, you can't have both tool windows tabbed on a single window outside the toolbars.
+
+on a separate hidden desktop so I have to take the time to find the desktop, open the desktop, then switch to the correct tool window.
+
+Having the 1-keystroke solution working would depend if the OS allows you to configure the Desktops to gain focus and come to the forefront if any of the windows in them have activity.
+If not, an alternative would be a coinciding key bind where you set the Desktop containing the Run and Debug "window toolbars" to gain focus when you press Alt+4, Alt+5, Shift+F9, Shift+F10. Or changing the PyCharm shortcuts to coincide with the OS keyboard shortcuts that focus the designated Desktop.
+    
